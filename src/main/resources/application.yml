@@ -1,0 +1,8 @@
+spring:
+  profiles:
+    active: dev
+
+app:
+  name: Venue Catalog REST API
+  version: 1.0
+  description: API REST para la gestión de eventos y venues (almacenamiento en memoria)
