@@ -1,0 +1,18 @@
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+
+server:
+  port: 8081
+
+app:
+  name: Venue Catalog - Test Profile
+  environment: Pruebas
+
+logging:
+  level:
+    root: WARN
+    org.springframework.web: INFO
+  file:
+    name: logs/test-app.log

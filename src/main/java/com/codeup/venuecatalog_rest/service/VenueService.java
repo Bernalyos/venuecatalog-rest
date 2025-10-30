@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
+@Service
 public class VenueService {
 
     private final Map<Long, VenueDTO> store = new LinkedHashMap<>();

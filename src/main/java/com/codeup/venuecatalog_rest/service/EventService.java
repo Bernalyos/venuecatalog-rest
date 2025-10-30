@@ -3,9 +3,12 @@ package com.codeup.venuecatalog_rest.service;
 
 import com.codeup.venuecatalog_rest.DTO.EventDTO;
 import com.codeup.venuecatalog_rest.exception.NotFoundException;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+
+@Service
 public class EventService {
 
     private final Map<Long, EventDTO> store = new LinkedHashMap<>();
