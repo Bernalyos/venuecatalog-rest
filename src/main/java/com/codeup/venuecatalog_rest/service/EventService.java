@@ -16,3 +16,5 @@ public interface EventService {
 
     Page<EventEntity> findAll(Pageable pageable, String city, String category, LocalDate dateStart);
 }
+
+
