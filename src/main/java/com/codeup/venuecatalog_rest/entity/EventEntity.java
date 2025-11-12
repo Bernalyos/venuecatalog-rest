@@ -27,24 +27,23 @@ public class EventEntity {
     @Future
     @NotNull
     @Column
-    private LocalDateTime dateStar;
+    private LocalDateTime dateStart;
 
-    @ManyToMany
-    @JoinColumn
+    @ManyToOne
+    @JoinColumn(name = "venue_id")
     private VenueEntity venue;
 
     @NotBlank
     @Column
     private String category;
 
-    public EventEntity( Long id, String name, String description, LocalDateTime dateStar, VenueEntity venue, String categody){
-
+    public EventEntity(Long id, String name, String description, LocalDateTime dateStart, VenueEntity venue, String category){
         this.id = id;
         this.name = name;
-        this.description =  description;
-        this.dateStar = dateStar;
+        this.description = description;
+        this.dateStart = dateStart;
         this.venue = venue;
-        this.category = categody;
+        this.category = category;
     }
 
     // gett y sett
@@ -74,11 +73,11 @@ public class EventEntity {
     }
 
     public LocalDateTime getDateStart() {
-        return dateStar;
+        return dateStart;
     }
 
     public void setDateStart(LocalDateTime dateStart) {
-        this.dateStar = dateStar;
+        this.dateStart = dateStart;
     }
 
     public VenueEntity getVenue() {

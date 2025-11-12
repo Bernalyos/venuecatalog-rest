@@ -5,6 +5,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface EventRepository extends JpaRepository<EventRepository, Long>, JpaSpecificationExecutor<EventRepository> {
     boolean existsByName(String name);
 }
