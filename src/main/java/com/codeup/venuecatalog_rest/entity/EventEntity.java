@@ -16,12 +16,12 @@ public class EventEntity {
     @GeneratedValue
     private Long id;
 
-    @NotBlank
-    @Size
-    @Column
+    @NotBlank(message = "Event name is required")
+    @Size(max = 150, message = "Event name must not exceed 150 characters")
+    @Column(nullable = false, unique = true)
     private String name;
 
-    @Size
+    @Size(max = 1000, message = "Description must not exceed 1000 characters")
     private String description;
 
     @Future
