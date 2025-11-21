@@ -12,6 +12,8 @@ public interface EventRepositoryPort {
 
     List<Event> findAll();
 
+    List<Event> search(String name, java.time.LocalDate date, Long venueId);
+
     boolean existsByName(String name);
 
     void deleteById(Long id);

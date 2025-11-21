@@ -48,6 +48,29 @@ public class EventJpaAdapter implements EventRepositoryPort {
     }
 
     @Override
+    public List<Event> search(String name, java.time.LocalDate date, Long venueId) {
+        org.springframework.data.jpa.domain.Specification<EventEntity> spec = (root, query, cb) -> {
+            java.util.List<jakarta.persistence.criteria.Predicate> predicates = new java.util.ArrayList<>();
+
+            if (name != null && !name.isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+            }
+            if (date != null) {
+                predicates.add(cb.equal(root.get("date"), date));
+            }
+            if (venueId != null) {
+                predicates.add(cb.equal(root.get("venue").get("id"), venueId));
+            }
+
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+
+        return repository.findAll(spec).stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public boolean existsByName(String name) {
         return repository.existsByName(name);
     }
