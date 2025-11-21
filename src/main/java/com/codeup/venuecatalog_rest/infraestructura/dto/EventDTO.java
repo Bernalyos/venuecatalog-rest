@@ -4,6 +4,7 @@ public class EventDTO {
     private Long id;
     private String name;
     private String description;
+    private java.time.LocalDate date;
     private Long venueId;
 
     // Getters & Setters
@@ -30,6 +31,14 @@ public class EventDTO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public java.time.LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(java.time.LocalDate date) {
+        this.date = date;
     }
 
     public Long getVenueId() {

@@ -11,9 +11,11 @@ public class EventEntity {
 
     private String name;
     private String description;
+    private java.time.LocalDate date;
 
-    @Column(name = "venue_id")
-    private Long venueId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "venue_id")
+    private VenueEntity venue;
 
     // Getters & Setters
 
@@ -41,11 +43,19 @@ public class EventEntity {
         this.description = description;
     }
 
-    public Long getVenueId() {
-        return venueId;
+    public java.time.LocalDate getDate() {
+        return date;
     }
 
-    public void setVenueId(Long venueId) {
-        this.venueId = venueId;
+    public void setDate(java.time.LocalDate date) {
+        this.date = date;
+    }
+
+    public VenueEntity getVenue() {
+        return venue;
+    }
+
+    public void setVenue(VenueEntity venue) {
+        this.venue = venue;
     }
 }

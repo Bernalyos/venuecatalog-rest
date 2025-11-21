@@ -12,16 +12,25 @@ import java.util.Optional;
 public class EventJpaAdapter implements EventRepositoryPort {
 
     private final EventJpaRepository repository;
+    private final VenueJpaRepository venueRepository;
     private final EventMapper mapper;
 
-    public EventJpaAdapter(EventJpaRepository repository, EventMapper mapper) {
+    public EventJpaAdapter(EventJpaRepository repository, VenueJpaRepository venueRepository, EventMapper mapper) {
         this.repository = repository;
+        this.venueRepository = venueRepository;
         this.mapper = mapper;
     }
 
     @Override
     public Event save(Event event) {
         EventEntity entity = mapper.toEntity(event);
+
+        if (event.getVenueId() != null) {
+            VenueEntity venue = venueRepository.findById(event.getVenueId())
+                    .orElseThrow(() -> new IllegalArgumentException("Venue not found with id: " + event.getVenueId()));
+            entity.setVenue(venue);
+        }
+
         EventEntity saved = repository.save(entity);
         return mapper.toDomain(saved);
     }

@@ -13,6 +13,9 @@ public class VenueEntity {
     private String name;
     private String location;
 
+    @OneToMany(mappedBy = "venue", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private java.util.List<EventEntity> events = new java.util.ArrayList<>();
+
     // Getters & Setters
 
     public Long getId() {
@@ -37,5 +40,23 @@ public class VenueEntity {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public java.util.List<EventEntity> getEvents() {
+        return events;
+    }
+
+    public void setEvents(java.util.List<EventEntity> events) {
+        this.events = events;
+    }
+
+    public void addEvent(EventEntity event) {
+        events.add(event);
+        event.setVenue(this);
+    }
+
+    public void removeEvent(EventEntity event) {
+        events.remove(event);
+        event.setVenue(null);
     }
 }
