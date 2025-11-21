@@ -60,6 +60,45 @@ java -jar target/venuecatalog-rest-0.0.1-SNAPSHOT.jar
 
 By default, the application runs on `http://localhost:8080`.
 
+## Docker Support
+
+The application can be run using Docker for consistent deployment across environments.
+
+### Quick Start with Docker Compose
+
+```bash
+# Build and start the application
+docker-compose up
+
+# Or run in background
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop the application
+docker-compose down
+```
+
+### Manual Docker Commands
+
+```bash
+# Build the image
+docker build -t venuecatalog-rest:latest .
+
+# Run the container
+docker run -p 8080:8080 --name venuecatalog venuecatalog-rest:latest
+```
+
+### Docker Features
+
+- **Multi-stage build**: Optimized image size (~200MB)
+- **Health checks**: Automatic monitoring
+- **Environment variables**: Easy configuration
+- **Layer caching**: Fast rebuilds
+
+For detailed Docker documentation, see [DOCKER.md](DOCKER.md).
+
 ## API Documentation (Swagger / OpenAPI)
 
 You can access the interactive API documentation and test endpoints directly from your browser:
