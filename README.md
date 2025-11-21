@@ -1,240 +1,239 @@
 # VenueCatalog REST
 
-Proyecto Spring Boot que expone una API para gestionar recintos (venues) y eventos (events) con persistencia JPA (H2 en memoria), validaciones, paginación, filtros y migraciones de base de datos.
+Spring Boot project that exposes an API to manage venues and events with JPA persistence (H2 in-memory database), validations, pagination, filters, and database migrations.
 
-## Resumen
-- **Gestión de Venues y Eventos**: CRUD completo con validaciones.
-- **Relaciones JPA**: Relación `OneToMany` / `ManyToOne` entre Venues y Events con gestión de ciclo de vida.
-- **Optimización de Consultas**: Búsquedas dinámicas con Specifications y prevención de N+1 queries con `@EntityGraph`.
-- **Transaccionalidad**: Gestión de transacciones con `@Transactional` en la capa de aplicación.
-- **Migraciones**: Flyway para control de versiones del esquema de base de datos.
-- **Persistencia**: Base de datos H2 en memoria con esquema gestionado por Flyway.
-- **API REST**: Endpoints documentados con OpenAPI.
-- **Arquitectura**: Diseño hexagonal para mantenibilidad y desacoplamiento.
-- **Documentación**: Swagger/OpenAPI mediante `springdoc-openapi` (UI disponible)
+## Summary
+- **Venue and Event Management**: Complete CRUD with validations.
+- **JPA Relationships**: `OneToMany` / `ManyToOne` relationship between Venues and Events with lifecycle management.
+- **Query Optimization**: Dynamic searches with Specifications and N+1 query prevention with `@EntityGraph`.
+- **Transactionality**: Transaction management with `@Transactional` in the application layer.
+- **Migrations**: Flyway for database schema version control.
+- **Persistence**: H2 in-memory database with schema managed by Flyway.
+- **REST API**: Endpoints documented with OpenAPI.
+- **Architecture**: Hexagonal design for maintainability and decoupling.
+- **Documentation**: Swagger/OpenAPI via `springdoc-openapi` (UI available)
 
-## Arquitectura
+## Architecture
 
-El proyecto sigue una **Arquitectura Hexagonal** (Ports and Adapters) para desacoplar la lógica de negocio de los detalles de infraestructura y frameworks.
+The project follows a **Hexagonal Architecture** (Ports and Adapters) to decouple business logic from infrastructure details and frameworks.
 
-### Estructura de Carpetas
+### Folder Structure
 
-### Estructura de Carpetas
+### Folder Structure
 
 ```text
 src/main/java/com/codeup/venuecatalog_rest
 ├── aplication
-│   └── usecase          # Implementación de casos de uso (Lógica de negocio)
+│   └── usecase          # Use case implementations (Business logic)
 ├── domain
-│   ├── model            # Objetos de dominio puro (Entidades de negocio)
-│   └── ports            # Interfaces (Puertos de entrada y salida)
+│   ├── model            # Pure domain objects (Business entities)
+│   └── ports            # Interfaces (Input and output ports)
 └── infraestructura
     ├── adapters
     │   ├── in
-    │   │   └── web      # Controladores REST (Entrada)
+    │   │   └── web      # REST Controllers (Input)
     │   └── out
-    │       └── jpa      # Adaptadores de persistencia Spring Data JPA (Salida)
-    ├── config           # Configuración de Beans (Inyección de dependencias)
+    │       └── jpa      # Spring Data JPA persistence adapters (Output)
+    ├── config           # Bean configuration (Dependency injection)
     ├── dto              # Data Transfer Objects (API)
     └── mappers          # Mappers (MapStruct)
 ```
 
-## Requisitos
-- JDK 17+ (proyecto configurado para Java 17 en `pom.xml`)
-- Maven (se incluye wrapper `./mvnw`)
+## Requirements
+- JDK 17+ (project configured for Java 17 in `pom.xml`)
+- Maven (wrapper `./mvnw` included)
 
-## Ejecutar la aplicación
+## Running the Application
 
-Desde la raíz del proyecto:
+From the project root:
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-O construir y ejecutar el JAR:
+Or build and run the JAR:
 
 ```bash
 ./mvnw -DskipTests clean package
 java -jar target/venuecatalog-rest-0.0.1-SNAPSHOT.jar
 ```
 
-Por defecto la aplicación corre en `http://localhost:8080`.
+By default, the application runs on `http://localhost:8080`.
 
-## Documentación de la API (Swagger / OpenAPI)
+## API Documentation (Swagger / OpenAPI)
 
-Puedes acceder a la documentación interactiva de la API y probar los endpoints directamente desde el navegador:
+You can access the interactive API documentation and test endpoints directly from your browser:
 
 - **Swagger UI**: [http://localhost:8080/swagger-ui/index.html#/](http://localhost:8080/swagger-ui/index.html#/)
 - **OpenAPI JSON**: `http://localhost:8080/v3/api-docs`
 
-Si no ves Swagger:
-1. Asegúrate que la app está arrancada y sin errores en consola.
-2. Revisa que `org.springdoc:springdoc-openapi-starter-webmvc-ui` esté en `pom.xml`.
+If you don't see Swagger:
+1. Make sure the app is running without errors in the console.
+2. Check that `org.springdoc:springdoc-openapi-starter-webmvc-ui` is in `pom.xml`.
 
 ## H2 Console
 
-Para inspeccionar la base de datos en memoria:
+To inspect the in-memory database:
 - **URL**: `http://localhost:8080/h2-console`
-- **JDBC URL**: `jdbc:h2:mem:testdb` (Configurado en `application.properties`)
-- **Usuario**: `sa`
-- **Contraseña**: (dejar vacía)
+- **JDBC URL**: `jdbc:h2:mem:testdb` (Configured in `application.properties`)
+- **Username**: `sa`
+- **Password**: (leave empty)
 
-## Características Principales
+## Key Features
 
-### 1. Relaciones JPA
+### 1. JPA Relationships
 
-El proyecto implementa relaciones bidireccionales entre `VenueEntity` y `EventEntity`:
+The project implements bidirectional relationships between `VenueEntity` and `EventEntity`:
 
-- **`VenueEntity`**: Contiene una colección de eventos (`@OneToMany`)
-  - `cascade = CascadeType.ALL`: Al guardar/eliminar un venue, se guardan/eliminan sus eventos
-  - `orphanRemoval = true`: Los eventos huérfanos se eliminan automáticamente
-  - `fetch = FetchType.LAZY`: Los eventos se cargan bajo demanda
+- **`VenueEntity`**: Contains a collection of events (`@OneToMany`)
+  - `cascade = CascadeType.ALL`: When saving/deleting a venue, its events are saved/deleted
+  - `orphanRemoval = true`: Orphaned events are automatically deleted
+  - `fetch = FetchType.LAZY`: Events are loaded on demand
 
-- **`EventEntity`**: Referencia a su venue (`@ManyToOne`)
-  - `fetch = FetchType.LAZY`: El venue se carga bajo demanda
-  - `@JoinColumn(name = "venue_id")`: Clave foránea en la tabla `events`
+- **`EventEntity`**: References its venue (`@ManyToOne`)
+  - `fetch = FetchType.LAZY`: Venue is loaded on demand
+  - `@JoinColumn(name = "venue_id")`: Foreign key in the `events` table
 
-**Métodos helper** en `VenueEntity` para mantener consistencia bidireccional:
+**Helper methods** in `VenueEntity` to maintain bidirectional consistency:
 ```java
-venue.addEvent(event);    // Agrega evento y establece la relación bidireccional
-venue.removeEvent(event); // Remueve evento y limpia la relación
+venue.addEvent(event);    // Adds event and establishes bidirectional relationship
+venue.removeEvent(event); // Removes event and clears relationship
 ```
 
-### 2. Optimización de Consultas
+### 2. Query Optimization
 
-#### Búsquedas Dinámicas con Specifications
-El repositorio `EventJpaRepository` extiende `JpaSpecificationExecutor` para permitir consultas dinámicas:
+#### Dynamic Searches with Specifications
+The `EventJpaRepository` extends `JpaSpecificationExecutor` to allow dynamic queries:
 
 ```java
-// Búsqueda con filtros opcionales
+// Search with optional filters
 List<Event> events = eventAdapter.search("Concert", LocalDate.of(2023, 10, 1), venueId);
 ```
 
-Filtros disponibles:
-- **name**: Búsqueda parcial (case-insensitive)
-- **date**: Filtro por fecha exacta
-- **venueId**: Filtro por venue
+Available filters:
+- **name**: Partial search (case-insensitive)
+- **date**: Filter by exact date
+- **venueId**: Filter by venue
 
-#### Prevención de N+1 Queries
-Se utiliza `@EntityGraph` para cargar relaciones de forma eficiente:
+#### N+1 Query Prevention
+`@EntityGraph` is used to load relationships efficiently:
 
 ```java
 @EntityGraph(attributePaths = {"venue"})
 List<EventEntity> findAll();
 ```
 
-Esto garantiza que al listar eventos, los venues asociados se cargan en una sola consulta SQL.
+This ensures that when listing events, associated venues are loaded in a single SQL query.
 
-### 3. Transaccionalidad
+### 3. Transactionality
 
-Todos los casos de uso en la capa de aplicación están anotados con `@Transactional`:
+All use cases in the application layer are annotated with `@Transactional`:
 
-- **Operaciones de escritura** (`Create`, `Update`, `Delete`): `@Transactional`
-- **Operaciones de lectura** (`Get`, `List`): `@Transactional(readOnly = true)`
+- **Write operations** (`Create`, `Update`, `Delete`): `@Transactional`
+- **Read operations** (`Get`, `List`): `@Transactional(readOnly = true)`
 
-Esto asegura:
-- Consistencia de datos
-- Rollback automático en caso de errores
-- Optimizaciones de rendimiento para consultas de solo lectura
+This ensures:
+- Data consistency
+- Automatic rollback on errors
+- Performance optimizations for read-only queries
 
-### 4. Migraciones con Flyway
+### 4. Flyway Migrations
 
-El esquema de base de datos se gestiona mediante scripts de migración versionados:
+The database schema is managed through versioned migration scripts:
 
-**Ubicación**: `src/main/resources/db/migration/`
+**Location**: `src/main/resources/db/migration/`
 
-- **`V1__init.sql`**: Creación de tablas `venues` y `events` con clave foránea
-- **`V2__data.sql`**: Datos iniciales de prueba
+- **`V1__init.sql`**: Creation of `venues` and `events` tables with foreign key
+- **`V2__data.sql`**: Initial test data
 
-**Configuración**:
-- `spring.jpa.hibernate.ddl-auto=validate`: Hibernate valida el esquema sin modificarlo
-- Flyway ejecuta automáticamente las migraciones pendientes al iniciar la aplicación
+**Configuration**:
+- `spring.jpa.hibernate.ddl-auto=validate`: Hibernate validates the schema without modifying it
+- Flyway automatically executes pending migrations on application startup
 
-**Verificar migraciones**:
+**Verify migrations**:
 ```sql
--- En H2 Console
+-- In H2 Console
 SELECT * FROM flyway_schema_history;
 ```
 
-## Endpoints principales
+## Main Endpoints
 
 Base: `/api`
 
 ### Venues
-- `GET /api/venues` — Lista venues
-- `GET /api/venues/{id}` — Obtener venue por id
-- `POST /api/venues` — Crear venue (payload `VenueDto`)
-- `DELETE /api/venues/{id}` — Borrar venue
+- `GET /api/venues` — List venues
+- `GET /api/venues/{id}` — Get venue by id
+- `POST /api/venues` — Create venue (payload `VenueDto`)
+- `DELETE /api/venues/{id}` — Delete venue
 
 ### Events
-- `GET /api/events` — Lista paginada de eventos. Parámetros opcionales: `page`, `size`, `sort`, `city`, `category`, `dateStart`.
-- `GET /api/events/{id}` — Obtener evento por id
-- `POST /api/events` — Crear evento (payload `EventDto`)
-- `PUT /api/events/{id}` — Actualizar evento (payload `EventDto`)
-- `DELETE /api/events/{id}` — Borrar evento
+- `GET /api/events` — Paginated list of events. Optional parameters: `page`, `size`, `sort`, `city`, `category`, `dateStart`.
+- `GET /api/events/{id}` — Get event by id
+- `POST /api/events` — Create event (payload `EventDto`)
+- `PUT /api/events/{id}` — Update event (payload `EventDto`)
+- `DELETE /api/events/{id}` — Delete event
 
-## Ejemplos de uso (cURL)
+## Usage Examples (cURL)
 
-**Crear un Venue:**
+**Create a Venue:**
 ```bash
 curl -X POST http://localhost:8080/api/venues \
   -H "Content-Type: application/json" \
   -d '{"name":"Sala Moliere","city":"Paris"}'
 ```
 
-**Crear un Evento:**
+**Create an Event:**
 ```bash
 curl -X POST http://localhost:8080/api/events \
   -H "Content-Type: application/json" \
-  -d '{"name":"Concierto de Jazz","description":"Noche de jazz","dateStart":"2025-12-01T20:00:00","venueId":1,"category":"music"}'
+  -d '{"name":"Jazz Concert","description":"Jazz night","dateStart":"2025-12-01T20:00:00","venueId":1,"category":"music"}'
 ```
 
 ## Tests
 
-Para ejecutar las pruebas unitarias y de integración:
+To run unit and integration tests:
 
 ```bash
 ./mvnw test
 ```
 
-### Tests de Integración
+### Integration Tests
 
-El proyecto incluye tests de integración que verifican:
+The project includes integration tests that verify:
 
 **`RelationshipIntegrationTest`**:
-- Relaciones bidireccionales entre Venue y Event
-- Cascade de operaciones (guardar/eliminar)
+- Bidirectional relationships between Venue and Event
+- Cascade operations (save/delete)
 - Orphan removal
 - Lazy loading
 
 **`QueryOptimizationTest`**:
-- Búsquedas dinámicas con filtros (nombre, fecha, venue)
-- Filtros combinados
-- EntityGraph para prevención de N+1 queries
+- Dynamic searches with filters (name, date, venue)
+- Combined filters
+- EntityGraph for N+1 query prevention
 
-## Tecnologías Utilizadas
+## Technologies Used
 
-- **Spring Boot 3.5.7**: Framework principal
-- **Spring Data JPA**: Persistencia y repositorios
+- **Spring Boot 3.5.7**: Main framework
+- **Spring Data JPA**: Persistence and repositories
 - **Hibernate**: ORM
-- **Flyway**: Migraciones de base de datos
-- **H2 Database**: Base de datos en memoria
-- **MapStruct 1.5.5**: Mapeo de objetos
-- **SpringDoc OpenAPI**: Documentación de API
+- **Flyway**: Database migrations
+- **H2 Database**: In-memory database
+- **MapStruct 1.5.5**: Object mapping
+- **SpringDoc OpenAPI**: API documentation
 - **JUnit 5**: Testing
 
-## Estructura de Commits
+## Commit Structure
 
-El proyecto sigue buenas prácticas de Git:
+The project follows Git best practices:
 
-- **Ramas de feature**: Cada tarea se desarrolló en su propia rama
-  - `feature/task1-relationships`: Relaciones JPA
-  - `feature/task2-optimization`: Optimización de consultas
-  - `feature/task3-transactions`: Transaccionalidad y Flyway
-- **Rama de integración**: `HU-semana4` contiene todos los cambios integrados
-- **Commits descriptivos**: Mensajes claros siguiendo convención `Feat:`, `Fix:`, etc.
+- **Feature branches**: Each task was developed in its own branch
+  - `feature/task1-relationships`: JPA relationships
+  - `feature/task2-optimization`: Query optimization
+  - `feature/task3-transactions`: Transactionality and Flyway
+- **Integration branch**: `HU-semana4` contains all integrated changes
+- **Descriptive commits**: Clear messages following `Feat:`, `Fix:`, etc. convention
 
-## Autor
+## Author
 
-Proyecto desarrollado como parte del curso de Spring Boot - Arquitectura Hexagonal.
-
+Project developed as part of the Spring Boot - Hexagonal Architecture course.
