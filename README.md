@@ -3,14 +3,38 @@
 Proyecto Spring Boot que expone una API para gestionar recintos (venues) y eventos (events) con persistencia JPA (H2 en memoria), validaciones, paginación y filtros.
 
 ## Resumen
-- **Entidades**: `EventEntity`, `VenueEntity` (JPA)
-- **Repositorios**: `EventRepository`, `VenueRepository` (`JpaRepository` + `JpaSpecificationExecutor`)
-- **Servicios**: `EventService`, `VenueService` con implementación persistente
-- **DTOs**: `EventDto`, `VenueDto` y mappers (`EventMapper`, `VenueMapper`)
-- **Controladores REST**: `EventController` y `VenueController` (usa DTOs)
-- **Manejo global de errores**: `GlobalExceptionHandler` (JSON estructurado)
-- **Base de datos**: H2 in-memory para desarrollo y pruebas
-- **Documentación**: Swagger/OpenAPI mediante `springdoc-openapi`
+- **Gestión de Venues y Eventos**: CRUD completo con validaciones.
+- **Persistencia**: Base de datos H2 en memoria.
+- **API REST**: Endpoints documentados con OpenAPI.
+- **Arquitectura**: Diseño hexagonal para mantenibilidad y desacoplamiento.
+
+- **Documentación**: Swagger/OpenAPI mediante `springdoc-openapi` (UI disponible)
+
+## Arquitectura
+
+El proyecto sigue una **Arquitectura Hexagonal** (Ports and Adapters) para desacoplar la lógica de negocio de los detalles de infraestructura y frameworks.
+
+### Estructura de Carpetas
+
+### Estructura de Carpetas
+
+```text
+src/main/java/com/codeup/venuecatalog_rest
+├── aplication
+│   └── usecase          # Implementación de casos de uso (Lógica de negocio)
+├── domain
+│   ├── model            # Objetos de dominio puro (Entidades de negocio)
+│   └── ports            # Interfaces (Puertos de entrada y salida)
+└── infraestructura
+    ├── adapters
+    │   ├── in
+    │   │   └── web      # Controladores REST (Entrada)
+    │   └── out
+    │       └── jpa      # Adaptadores de persistencia Spring Data JPA (Salida)
+    ├── config           # Configuración de Beans (Inyección de dependencias)
+    ├── dto              # Data Transfer Objects (API)
+    └── mappers          # Mappers (MapStruct)
+```
 
 ## Requisitos
 - JDK 17+ (proyecto configurado para Java 17 en `pom.xml`)
