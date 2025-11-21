@@ -4,6 +4,9 @@ import com.codeup.venuecatalog_rest.domain.model.Event;
 import com.codeup.venuecatalog_rest.domain.ports.in.CreateEventUseCase;
 import com.codeup.venuecatalog_rest.domain.ports.out.EventRepositoryPort;
 
+import org.springframework.transaction.annotation.Transactional;
+
+@Transactional
 public class CreateEventUseCaseImpl implements CreateEventUseCase {
 
     private final EventRepositoryPort eventRepositoryPort;
@@ -17,4 +20,3 @@ public class CreateEventUseCaseImpl implements CreateEventUseCase {
         return eventRepositoryPort.save(event);
     }
 }
-

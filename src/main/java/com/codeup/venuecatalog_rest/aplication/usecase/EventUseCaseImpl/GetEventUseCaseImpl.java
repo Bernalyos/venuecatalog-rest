@@ -6,6 +6,9 @@ import com.codeup.venuecatalog_rest.domain.ports.out.EventRepositoryPort;
 
 import java.util.Optional;
 
+import org.springframework.transaction.annotation.Transactional;
+
+@Transactional(readOnly = true)
 public class GetEventUseCaseImpl implements GetEventUseCase {
 
     private final EventRepositoryPort eventRepositoryPort;
