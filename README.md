@@ -18,6 +18,27 @@ Proyecto Spring Boot que expone una API para gestionar recintos (venues) y event
 
 Si quieres actualizar a Java 21 se requiere cambiar la configuración del `pom.xml` y usar JDK 21 en la máquina.
 
+
+### Estructura de Carpetas
+
+```text
+src/main/java/com/codeup/venuecatalog_rest
+├── aplication
+│   └── usecase          # Implementación de casos de uso (Lógica de negocio)
+├── domain
+│   ├── model            # Objetos de dominio puro (Entidades de negocio)
+│   └── ports            # Interfaces (Puertos de entrada y salida)
+└── infraestructura
+    ├── adapters
+    │   ├── in
+    │   │   └── web      # Controladores REST (Entrada)
+    │   └── out
+    │       └── jpa      # Adaptadores de persistencia Spring Data JPA (Salida)
+    ├── config           # Configuración de Beans (Inyección de dependencias)
+    ├── dto              # Data Transfer Objects (API)
+    └── mappers          # Mappers (MapStruct)
+```
+
 ## Ejecutar la aplicación
 
 Desde la raíz del proyecto:
