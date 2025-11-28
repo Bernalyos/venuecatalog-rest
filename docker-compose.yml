@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   venuecatalog-app:
     build:
@@ -11,18 +9,60 @@ services:
     environment:
       # JVM Options
       - JAVA_OPTS=-Xmx512m -Xms256m
-      # Spring Profile (optional)
+
+      # Spring Profile
       - SPRING_PROFILES_ACTIVE=default
+
+      # === MySQL Connection ===
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/venuecatalog?useSSL=false&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=venueuser
+      - SPRING_DATASOURCE_PASSWORD=venuepass
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update   # Opcional
+
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+
     restart: unless-stopped
     networks:
       - venuecatalog-network
 
+
+  # ============================
+  #        MYSQL SERVICE
+  # ============================
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-venue
+    restart: unless-stopped
+    environment:
+
+      MYSQL_DATABASE: venue
+      MYSQL_USER: root
+      MYSQL_PASSWORD:  Qwe.123*
+    ports:
+      - "3307:3306"   # Puedes cambiarlo
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "venueuser", "-pvenuepass"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - venuecatalog-network
+
+
 networks:
   venuecatalog-network:
     driver: bridge
+
+volumes:
+  mysql_data:
