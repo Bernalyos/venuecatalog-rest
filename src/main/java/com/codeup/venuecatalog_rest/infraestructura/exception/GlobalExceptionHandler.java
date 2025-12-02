@@ -180,6 +180,32 @@ public class GlobalExceptionHandler {
         }
 
         /**
+         * Handles access denied exceptions
+         * Returns 403 Forbidden
+         */
+        @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+        public ProblemDetail handleAccessDeniedException(
+                        org.springframework.security.access.AccessDeniedException ex,
+                        WebRequest request) {
+
+                String traceId = getTraceId();
+
+                ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                                HttpStatus.FORBIDDEN,
+                                "Acceso denegado. No tienes permisos para realizar esta acción.");
+
+                problemDetail.setType(URI.create("https://api.venuecatalog.com/errors/access-denied"));
+                problemDetail.setTitle("Acceso Denegado");
+                problemDetail.setProperty("timestamp", Instant.now());
+                problemDetail.setProperty("traceId", traceId);
+                problemDetail.setProperty("instance", request.getDescription(false).replace("uri=", ""));
+
+                logger.warn("Access denied - traceId: {}, message: {}", traceId, ex.getMessage());
+
+                return problemDetail;
+        }
+
+        /**
          * Handles all other exceptions
          * Returns 500 Internal Server Error
          */

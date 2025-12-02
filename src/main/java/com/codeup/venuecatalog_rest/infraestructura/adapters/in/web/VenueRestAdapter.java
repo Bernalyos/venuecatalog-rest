@@ -7,6 +7,7 @@ import com.codeup.venuecatalog_rest.infraestructura.mappers.VenueMapper;
 import com.codeup.venuecatalog_rest.infraestructura.validation.ValidationGroups;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,6 +43,7 @@ public class VenueRestAdapter {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<VenueDTO> create(
             @Validated(ValidationGroups.Create.class) @RequestBody VenueDTO dto) {
         Venue created = createVenueUseCase.create(mapper.toDomain(dto));
@@ -49,12 +51,14 @@ public class VenueRestAdapter {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public ResponseEntity<VenueDTO> get(@PathVariable Long id) {
         return ResponseEntity.of(
                 getVenueUseCase.getById(id).map(mapper::toDto));
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public ResponseEntity<?> list() {
         return ResponseEntity.ok(
                 listVenuesUseCase.list().stream()
@@ -63,6 +67,7 @@ public class VenueRestAdapter {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<VenueDTO> update(
             @PathVariable Long id,
             @Validated(ValidationGroups.Update.class) @RequestBody VenueDTO dto) {
@@ -71,6 +76,7 @@ public class VenueRestAdapter {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         deleteVenueUseCase.delete(id);
         return ResponseEntity.noContent().build();

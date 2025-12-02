@@ -7,6 +7,7 @@ import com.codeup.venuecatalog_rest.infraestructura.mappers.EventMapper;
 import com.codeup.venuecatalog_rest.infraestructura.validation.ValidationGroups;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,6 +42,7 @@ public class EventRestAdapter {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<EventDTO> create(
             @Validated(ValidationGroups.Create.class) @RequestBody EventDTO dto) {
         Event created = createEventUseCase.create(mapper.toDomain(dto));
@@ -48,12 +50,14 @@ public class EventRestAdapter {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public ResponseEntity<EventDTO> get(@PathVariable Long id) {
         return ResponseEntity.of(
                 getEventUseCase.getById(id).map(mapper::toDto));
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public ResponseEntity<?> list() {
         return ResponseEntity.ok(
                 listEventsUseCase.list().stream()
@@ -62,6 +66,7 @@ public class EventRestAdapter {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<EventDTO> update(
             @PathVariable Long id,
             @Validated(ValidationGroups.Update.class) @RequestBody EventDTO dto) {
@@ -70,6 +75,7 @@ public class EventRestAdapter {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         deleteEventUseCase.delete(id);
         return ResponseEntity.noContent().build();
