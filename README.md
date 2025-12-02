@@ -1,278 +1,310 @@
-# VenueCatalog REST
+# VenueCatalog REST API
 
-Spring Boot project that exposes an API to manage venues and events with JPA persistence (H2 in-memory database), validations, pagination, filters, and database migrations.
+Sistema de gestión de eventos y venues con arquitectura hexagonal, seguridad JWT, logging estructurado y control de acceso basado en roles.
 
-## Summary
-- **Venue and Event Management**: Complete CRUD with validations.
-- **JPA Relationships**: `OneToMany` / `ManyToOne` relationship between Venues and Events with lifecycle management.
-- **Query Optimization**: Dynamic searches with Specifications and N+1 query prevention with `@EntityGraph`.
-- **Transactionality**: Transaction management with `@Transactional` in the application layer.
-- **Migrations**: Flyway for database schema version control.
-- **Persistence**: H2 in-memory database with schema managed by Flyway.
-- **REST API**: Endpoints documented with OpenAPI.
-- **Architecture**: Hexagonal design for maintainability and decoupling.
-- **Documentation**: Swagger/OpenAPI via `springdoc-openapi` (UI available)
+## 📋 Características Principales
 
-## Architecture
+- **Gestión de Venues y Eventos**: CRUD completo con validaciones avanzadas
+- **Seguridad JWT**: Autenticación stateless con tokens firmados
+- **Control de Acceso por Rol**: RBAC con `@PreAuthorize`
+- **Logging Estructurado**: Trazabilidad con `traceId` en cada request
+- **Manejo de Errores**: RFC 7807 ProblemDetail con contexto completo
+- **CORS Configurado**: Listo para integración con frontends
+- **Optimización de Queries**: Prevención N+1 con `@EntityGraph`
+- **Migraciones de BD**: Flyway para control de versiones del schema
+- **Documentación API**: Swagger/OpenAPI interactivo
 
-The project follows a **Hexagonal Architecture** (Ports and Adapters) to decouple business logic from infrastructure details and frameworks.
+## 🏗️ Arquitectura
 
-### Folder Structure
-
-### Folder Structure
+Arquitectura Hexagonal (Puertos y Adaptadores) para desacoplar lógica de negocio de infraestructura.
 
 ```text
 src/main/java/com/codeup/venuecatalog_rest
 ├── aplication
-│   └── usecase          # Use case implementations (Business logic)
+│   ├── service          # Servicios de aplicación (AuthService)
+│   └── usecase          # Casos de uso (Lógica de negocio)
 ├── domain
-│   ├── model            # Pure domain objects (Business entities)
-│   └── ports            # Interfaces (Input and output ports)
+│   ├── model            # Entidades de dominio puras
+│   └── ports            # Interfaces (Puertos de entrada/salida)
 └── infraestructura
     ├── adapters
     │   ├── in
-    │   │   └── web      # REST Controllers (Input)
+    │   │   └── web      # Controladores REST
     │   └── out
-    │       └── jpa      # Spring Data JPA persistence adapters (Output)
-    ├── config           # Bean configuration (Dependency injection)
-    ├── dto              # Data Transfer Objects (API)
-    └── mappers          # Mappers (MapStruct)
+    │       └── jpa      # Adaptadores de persistencia
+    ├── config           # Configuración (Security, Beans)
+    ├── dto              # Data Transfer Objects
+    ├── exception        # Manejo global de excepciones
+    ├── mappers          # MapStruct mappers
+    ├── security         # JWT, Filters, UserDetailsService
+    └── validation       # Grupos de validación
 ```
 
-## Requirements
-- JDK 17+ (project configured for Java 17 in `pom.xml`)
-- Maven (wrapper `./mvnw` included)
+## 🚀 Inicio Rápido
 
-## Running the Application
+### Requisitos
+- JDK 17+
+- Maven 3.6+
+- Docker (opcional)
 
-From the project root:
+### Ejecución Local
 
 ```bash
+# Con Maven wrapper
 ./mvnw spring-boot:run
-```
 
-Or build and run the JAR:
-
-```bash
-./mvnw -DskipTests clean package
+# O construir JAR
+./mvnw clean package -DskipTests
 java -jar target/venuecatalog-rest-0.0.1-SNAPSHOT.jar
 ```
 
-By default, the application runs on `http://localhost:8080`.
-
-## Docker Support
-
-The application can be run using Docker for consistent deployment across environments.
-
-### Quick Start with Docker Compose
+### Con Docker Compose
 
 ```bash
-# Build and start the application
-docker-compose up
-
-# Or run in background
+# Iniciar aplicación y base de datos
 docker-compose up -d
 
-# View logs
+# Ver logs
 docker-compose logs -f
 
-# Stop the application
+# Detener
 docker-compose down
 ```
 
-### Manual Docker Commands
+La aplicación estará disponible en `http://localhost:8080`
+
+## 🔐 Autenticación y Seguridad
+
+### Registro de Usuario
 
 ```bash
-# Build the image
-docker build -t venuecatalog-rest:latest .
-
-# Run the container
-docker run -p 8080:8080 --name venuecatalog venuecatalog-rest:latest
+curl -X POST http://localhost:8080/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "usuario",
+    "password": "password123"
+  }'
 ```
 
-### Docker Features
-
-- **Multi-stage build**: Optimized image size (~200MB)
-- **Health checks**: Automatic monitoring
-- **Environment variables**: Easy configuration
-- **Layer caching**: Fast rebuilds
-
-For detailed Docker documentation, see [DOCKER.md](DOCKER.md).
-
-## API Documentation (Swagger / OpenAPI)
-
-You can access the interactive API documentation and test endpoints directly from your browser:
-
-- **Swagger UI**: [http://localhost:8080/swagger-ui/index.html#/](http://localhost:8080/swagger-ui/index.html#/)
-- **OpenAPI JSON**: `http://localhost:8080/v3/api-docs`
-
-If you don't see Swagger:
-1. Make sure the app is running without errors in the console.
-2. Check that `org.springdoc:springdoc-openapi-starter-webmvc-ui` is in `pom.xml`.
-
-## H2 Console
-
-To inspect the in-memory database:
-- **URL**: `http://localhost:8080/h2-console`
-- **JDBC URL**: `jdbc:h2:mem:testdb` (Configured in `application.properties`)
-- **Username**: `sa`
-- **Password**: (leave empty)
-
-## Key Features
-
-### 1. JPA Relationships
-
-The project implements bidirectional relationships between `VenueEntity` and `EventEntity`:
-
-- **`VenueEntity`**: Contains a collection of events (`@OneToMany`)
-  - `cascade = CascadeType.ALL`: When saving/deleting a venue, its events are saved/deleted
-  - `orphanRemoval = true`: Orphaned events are automatically deleted
-  - `fetch = FetchType.LAZY`: Events are loaded on demand
-
-- **`EventEntity`**: References its venue (`@ManyToOne`)
-  - `fetch = FetchType.LAZY`: Venue is loaded on demand
-  - `@JoinColumn(name = "venue_id")`: Foreign key in the `events` table
-
-**Helper methods** in `VenueEntity` to maintain bidirectional consistency:
-```java
-venue.addEvent(event);    // Adds event and establishes bidirectional relationship
-venue.removeEvent(event); // Removes event and clears relationship
+**Respuesta:**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9..."
+}
 ```
 
-### 2. Query Optimization
+### Login
 
-#### Dynamic Searches with Specifications
-The `EventJpaRepository` extends `JpaSpecificationExecutor` to allow dynamic queries:
-
-```java
-// Search with optional filters
-List<Event> events = eventAdapter.search("Concert", LocalDate.of(2023, 10, 1), venueId);
+```bash
+curl -X POST http://localhost:8080/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "usuario",
+    "password": "password123"
+  }'
 ```
 
-Available filters:
-- **name**: Partial search (case-insensitive)
-- **date**: Filter by exact date
-- **venueId**: Filter by venue
+### Uso del Token
 
-#### N+1 Query Prevention
-`@EntityGraph` is used to load relationships efficiently:
-
-```java
-@EntityGraph(attributePaths = {"venue"})
-List<EventEntity> findAll();
+```bash
+curl http://localhost:8080/venues \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..."
 ```
 
-This ensures that when listing events, associated venues are loaded in a single SQL query.
+### Roles y Permisos
 
-### 3. Transactionality
+- **USER**: Acceso de lectura (GET)
+- **ADMIN**: Acceso completo (GET, POST, PUT, DELETE)
 
-All use cases in the application layer are annotated with `@Transactional`:
+Por defecto, los usuarios registrados tienen rol `USER`. Para promover a `ADMIN`:
 
-- **Write operations** (`Create`, `Update`, `Delete`): `@Transactional`
-- **Read operations** (`Get`, `List`): `@Transactional(readOnly = true)`
-
-This ensures:
-- Data consistency
-- Automatic rollback on errors
-- Performance optimizations for read-only queries
-
-### 4. Flyway Migrations
-
-The database schema is managed through versioned migration scripts:
-
-**Location**: `src/main/resources/db/migration/`
-
-- **`V1__init.sql`**: Creation of `venues` and `events` tables with foreign key
-- **`V2__data.sql`**: Initial test data
-
-**Configuration**:
-- `spring.jpa.hibernate.ddl-auto=validate`: Hibernate validates the schema without modifying it
-- Flyway automatically executes pending migrations on application startup
-
-**Verify migrations**:
 ```sql
--- In H2 Console
+-- Conectar a la base de datos
+UPDATE users SET role = 'ADMIN' WHERE username = 'usuario';
+```
+
+## 📡 Endpoints Principales
+
+### Autenticación (Público)
+- `POST /auth/register` — Registro de usuario
+- `POST /auth/login` — Inicio de sesión
+
+### Venues (Requiere autenticación)
+- `GET /venues` — Listar venues (USER/ADMIN)
+- `GET /venues/{id}` — Obtener venue (USER/ADMIN)
+- `POST /venues` — Crear venue (ADMIN)
+- `PUT /venues/{id}` — Actualizar venue (ADMIN)
+- `DELETE /venues/{id}` — Eliminar venue (ADMIN)
+
+### Events (Requiere autenticación)
+- `GET /events` — Listar eventos (USER/ADMIN)
+- `GET /events/{id}` — Obtener evento (USER/ADMIN)
+- `POST /events` — Crear evento (ADMIN)
+- `PUT /events/{id}` — Actualizar evento (ADMIN)
+- `DELETE /events/{id}` — Eliminar evento (ADMIN)
+
+## 📖 Documentación API
+
+### Swagger UI
+Accede a la documentación interactiva en:
+- **URL**: http://localhost:8080/swagger-ui/index.html
+- **OpenAPI JSON**: http://localhost:8080/v3/api-docs
+
+### Ejemplos de Uso
+
+**Crear Venue (requiere rol ADMIN):**
+```bash
+curl -X POST http://localhost:8080/venues \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Estadio Nacional",
+    "location": "Lima",
+    "capacity": 50000
+  }'
+```
+
+**Crear Evento (requiere rol ADMIN):**
+```bash
+curl -X POST http://localhost:8080/events \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Concierto de Rock",
+    "description": "Gran evento musical",
+    "date": "2025-12-25T20:00:00",
+    "venueId": 1
+  }'
+```
+
+## 🔍 Logging y Observabilidad
+
+Todos los logs incluyen contexto estructurado:
+
+```
+2025-12-02 14:53:40.670 INFO [nio-8080-exec-1] [traceId=2208aba1-117e-4d9f-93f5-d90a8b489b0e] [user=testuser] [GET /venues]
+```
+
+- **traceId**: Identificador único para rastrear requests
+- **user**: Usuario autenticado (o "anonymous")
+- **method**: Método HTTP
+- **uri**: Endpoint accedido
+
+### Manejo de Errores
+
+Todos los errores siguen RFC 7807 (ProblemDetail):
+
+```json
+{
+  "type": "https://api.venuecatalog.com/errors/access-denied",
+  "title": "Acceso Denegado",
+  "status": 403,
+  "detail": "Acceso denegado. No tienes permisos para realizar esta acción.",
+  "instance": "/venues",
+  "timestamp": "2025-12-02T19:56:56.821674255Z",
+  "traceId": "b9ab36f7-0a02-44e7-a2a7-c79035ff7431"
+}
+```
+
+## 🌐 Configuración CORS
+
+CORS está configurado para permitir requests desde:
+- `http://localhost:3000` (React)
+- `http://localhost:4200` (Angular)
+- `http://localhost:8081` (Alternativo)
+- `http://localhost:5173` (Vite)
+
+**Métodos permitidos**: GET, POST, PUT, DELETE, PATCH, OPTIONS  
+**Headers expuestos**: Authorization, X-Trace-Id  
+**Credenciales**: Habilitadas
+
+## 🗄️ Base de Datos
+
+### MySQL (Producción/Docker)
+- **Host**: localhost:3307
+- **Database**: venuecatalog
+- **User**: user
+- **Password**: password
+
+### H2 Console (Desarrollo)
+- **URL**: http://localhost:8080/h2-console
+- **JDBC URL**: `jdbc:mysql://localhost:3307/venuecatalog`
+- **Username**: user
+- **Password**: password
+
+### Migraciones Flyway
+
+Ubicación: `src/main/resources/db/migration/`
+
+- **V1__init.sql**: Tablas venues y events
+- **V2__data.sql**: Datos iniciales
+- **V3__security.sql**: Tabla users
+
+Verificar migraciones:
+```sql
 SELECT * FROM flyway_schema_history;
 ```
 
-## Main Endpoints
-
-Base: `/api`
-
-### Venues
-- `GET /api/venues` — List venues
-- `GET /api/venues/{id}` — Get venue by id
-- `POST /api/venues` — Create venue (payload `VenueDto`)
-- `DELETE /api/venues/{id}` — Delete venue
-
-### Events
-- `GET /api/events` — Paginated list of events. Optional parameters: `page`, `size`, `sort`, `city`, `category`, `dateStart`.
-- `GET /api/events/{id}` — Get event by id
-- `POST /api/events` — Create event (payload `EventDto`)
-- `PUT /api/events/{id}` — Update event (payload `EventDto`)
-- `DELETE /api/events/{id}` — Delete event
-
-## Usage Examples (cURL)
-
-**Create a Venue:**
-```bash
-curl -X POST http://localhost:8080/api/venues \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Sala Moliere","city":"Paris"}'
-```
-
-**Create an Event:**
-```bash
-curl -X POST http://localhost:8080/api/events \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Jazz Concert","description":"Jazz night","dateStart":"2025-12-01T20:00:00","venueId":1,"category":"music"}'
-```
-
-## Tests
-
-To run unit and integration tests:
+## 🧪 Tests
 
 ```bash
+# Ejecutar todos los tests
 ./mvnw test
+
+# Tests específicos
+./mvnw test -Dtest=RelationshipIntegrationTest
+./mvnw test -Dtest=QueryOptimizationTest
 ```
 
-### Integration Tests
+### Tests Incluidos
+- **RelationshipIntegrationTest**: Relaciones JPA y cascadas
+- **QueryOptimizationTest**: Búsquedas dinámicas y EntityGraph
+- **SecurityTests**: Autenticación y autorización
 
-The project includes integration tests that verify:
+## 🛠️ Tecnologías
 
-**`RelationshipIntegrationTest`**:
-- Bidirectional relationships between Venue and Event
-- Cascade operations (save/delete)
-- Orphan removal
-- Lazy loading
-
-**`QueryOptimizationTest`**:
-- Dynamic searches with filters (name, date, venue)
-- Combined filters
-- EntityGraph for N+1 query prevention
-
-## Technologies Used
-
-- **Spring Boot 3.5.7**: Main framework
-- **Spring Data JPA**: Persistence and repositories
+- **Spring Boot 3.5.7**: Framework principal
+- **Spring Security**: Autenticación y autorización
+- **JWT (jjwt 0.11.5)**: Tokens de autenticación
+- **Spring Data JPA**: Persistencia
 - **Hibernate**: ORM
-- **Flyway**: Database migrations
-- **H2 Database**: In-memory database
-- **MapStruct 1.5.5**: Object mapping
-- **SpringDoc OpenAPI**: API documentation
-- **JUnit 5**: Testing
+- **Flyway**: Migraciones de BD
+- **MySQL 8.0**: Base de datos
+- **MapStruct 1.5.5**: Mapeo de objetos
+- **SpringDoc OpenAPI**: Documentación API
+- **Logback**: Logging estructurado
+- **JUnit 5 & Mockito**: Testing
 
-## Commit Structure
+## 📦 Estructura de Commits
 
-The project follows Git best practices:
+- **feature/task2-observability-security**: Logging estructurado y seguridad JWT
+- **feature/task3-cors-security-policies**: Configuración CORS
 
-- **Feature branches**: Each task was developed in its own branch
-  - `feature/task1-relationships`: JPA relationships
-  - `feature/task2-optimization`: Query optimization
-  - `feature/task3-transactions`: Transactionality and Flyway
-- **Integration branch**: `HU-semana4` contains all integrated changes
-- **Descriptive commits**: Clear messages following `Feat:`, `Fix:`, etc. convention
+Convención de commits: `feat:`, `fix:`, `docs:`, `refactor:`
 
-## Author
+## 🔧 Configuración
 
-Project developed as part of the Spring Boot - Hexagonal Architecture course.
+### Variables de Entorno (application.properties)
+
+```properties
+# JWT
+application.security.jwt.secret-key=<tu-clave-secreta-256-bits>
+application.security.jwt.expiration=86400000  # 1 día
+
+# Database
+spring.datasource.url=jdbc:mysql://localhost:3307/venuecatalog
+spring.datasource.username=user
+spring.datasource.password=password
+
+# Flyway
+spring.flyway.enabled=true
+spring.flyway.baseline-on-migrate=true
+```
+
+## 📝 Licencia
+
+Proyecto desarrollado como parte del curso de Spring Boot - Arquitectura Hexagonal.
+
+## 👥 Autor
+
+Desarrollado con ❤️ siguiendo las mejores prácticas de Spring Boot y arquitectura limpia.
