@@ -56,7 +56,7 @@ public class EventJpaAdapter implements EventRepositoryPort {
                 predicates.add(cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
             }
             if (date != null) {
-                predicates.add(cb.equal(root.get("date"), date));
+                predicates.add(cb.equal(root.get("startDate"), date));
             }
             if (venueId != null) {
                 predicates.add(cb.equal(root.get("venue").get("id"), venueId));

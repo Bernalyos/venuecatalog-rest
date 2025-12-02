@@ -4,11 +4,19 @@ import com.codeup.venuecatalog_rest.domain.model.Venue;
 import com.codeup.venuecatalog_rest.domain.ports.in.*;
 import com.codeup.venuecatalog_rest.infraestructura.dto.VenueDTO;
 import com.codeup.venuecatalog_rest.infraestructura.mappers.VenueMapper;
+import com.codeup.venuecatalog_rest.infraestructura.validation.ValidationGroups;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * REST adapter for Venue operations
+ * Implements validation with groups for Create and Update scenarios
+ */
 @RestController
 @RequestMapping("/venues")
+@Validated
 public class VenueRestAdapter {
 
     private final CreateVenueUseCase createVenueUseCase;
@@ -24,8 +32,7 @@ public class VenueRestAdapter {
             ListVenuesUseCase listVenuesUseCase,
             UpdateVenueUseCase updateVenueUseCase,
             DeleteVenueUseCase deleteVenueUseCase,
-            VenueMapper mapper
-    ) {
+            VenueMapper mapper) {
         this.createVenueUseCase = createVenueUseCase;
         this.getVenueUseCase = getVenueUseCase;
         this.listVenuesUseCase = listVenuesUseCase;
@@ -35,16 +42,16 @@ public class VenueRestAdapter {
     }
 
     @PostMapping
-    public ResponseEntity<VenueDTO> create(@RequestBody VenueDTO dto) {
+    public ResponseEntity<VenueDTO> create(
+            @Validated(ValidationGroups.Create.class) @RequestBody VenueDTO dto) {
         Venue created = createVenueUseCase.create(mapper.toDomain(dto));
-        return ResponseEntity.ok(mapper.toDto(created));
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDto(created));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<VenueDTO> get(@PathVariable Long id) {
         return ResponseEntity.of(
-                getVenueUseCase.getById(id).map(mapper::toDto)
-        );
+                getVenueUseCase.getById(id).map(mapper::toDto));
     }
 
     @GetMapping
@@ -52,12 +59,13 @@ public class VenueRestAdapter {
         return ResponseEntity.ok(
                 listVenuesUseCase.list().stream()
                         .map(mapper::toDto)
-                        .toList()
-        );
+                        .toList());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<VenueDTO> update(@PathVariable Long id, @RequestBody VenueDTO dto) {
+    public ResponseEntity<VenueDTO> update(
+            @PathVariable Long id,
+            @Validated(ValidationGroups.Update.class) @RequestBody VenueDTO dto) {
         Venue updated = updateVenueUseCase.update(id, mapper.toDomain(dto));
         return ResponseEntity.ok(mapper.toDto(updated));
     }

@@ -38,13 +38,16 @@ public class QueryOptimizationTest {
         venue2.setLocation("Loc B");
         venueRepository.save(venue2);
 
-        Event event1 = new Event(null, "Concert A", "Desc A", LocalDate.of(2023, 10, 1), venue1.getId());
+        Event event1 = new Event(null, "Concert A", "Desc A", LocalDate.of(2023, 10, 1), LocalDate.of(2023, 10, 1),
+                venue1.getId());
         eventAdapter.save(event1);
 
-        Event event2 = new Event(null, "Concert B", "Desc B", LocalDate.of(2023, 10, 2), venue2.getId());
+        Event event2 = new Event(null, "Concert B", "Desc B", LocalDate.of(2023, 10, 2), LocalDate.of(2023, 10, 2),
+                venue2.getId());
         eventAdapter.save(event2);
 
-        Event event3 = new Event(null, "Festival A", "Desc C", LocalDate.of(2023, 10, 1), venue1.getId());
+        Event event3 = new Event(null, "Festival A", "Desc C", LocalDate.of(2023, 10, 1), LocalDate.of(2023, 10, 1),
+                venue1.getId());
         eventAdapter.save(event3);
 
         // Test 1: Filter by Name
@@ -73,7 +76,7 @@ public class QueryOptimizationTest {
         venue.setLocation("Graph Loc");
         venueRepository.save(venue);
 
-        Event event = new Event(null, "Graph Event", "Desc", LocalDate.now(), venue.getId());
+        Event event = new Event(null, "Graph Event", "Desc", LocalDate.now(), LocalDate.now(), venue.getId());
         eventAdapter.save(event);
 
         // Execute

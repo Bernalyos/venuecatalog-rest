@@ -11,7 +11,8 @@ public class EventEntity {
 
     private String name;
     private String description;
-    private java.time.LocalDate date;
+    private java.time.LocalDate startDate;
+    private java.time.LocalDate endDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "venue_id")
@@ -43,12 +44,20 @@ public class EventEntity {
         this.description = description;
     }
 
-    public java.time.LocalDate getDate() {
-        return date;
+    public java.time.LocalDate getStartDate() {
+        return startDate;
     }
 
-    public void setDate(java.time.LocalDate date) {
-        this.date = date;
+    public void setStartDate(java.time.LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public java.time.LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(java.time.LocalDate endDate) {
+        this.endDate = endDate;
     }
 
     public VenueEntity getVenue() {

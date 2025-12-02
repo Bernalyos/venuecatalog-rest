@@ -35,7 +35,8 @@ public class RelationshipIntegrationTest {
         EventEntity event = new EventEntity();
         event.setName("Test Event");
         event.setDescription("Test Description");
-        event.setDate(LocalDate.now());
+        event.setStartDate(LocalDate.now().plusDays(1));
+        event.setEndDate(LocalDate.now().plusDays(2));
 
         venue.addEvent(event); // Helper method sets bidirectional relationship
 
