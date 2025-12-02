@@ -30,6 +30,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/actuator/**", "/swagger-ui/**", "/v3/api-docs/**",
                                 "/h2-console/**")
@@ -42,6 +43,41 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable())); // For H2 Console
 
         return http.build();
+    }
+
+    @Bean
+    public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
+        org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
+
+        // Allow specific origins (configure based on your frontend URL)
+        configuration.setAllowedOrigins(java.util.Arrays.asList(
+                "http://localhost:3000", // React default
+                "http://localhost:4200", // Angular default
+                "http://localhost:8081", // Alternative frontend port
+                "http://localhost:5173" // Vite default
+        ));
+
+        // Allow all HTTP methods
+        configuration.setAllowedMethods(java.util.Arrays.asList(
+                "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+
+        // Allow all headers
+        configuration.setAllowedHeaders(java.util.Arrays.asList("*"));
+
+        // Allow credentials (cookies, authorization headers)
+        configuration.setAllowCredentials(true);
+
+        // Expose headers to the client
+        configuration.setExposedHeaders(java.util.Arrays.asList(
+                "Authorization", "X-Trace-Id"));
+
+        // Cache preflight response for 1 hour
+        configuration.setMaxAge(3600L);
+
+        org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
     }
 
     @Bean
