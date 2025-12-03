@@ -25,15 +25,17 @@ WORKDIR /app
 # Copy the JAR from build stage
 COPY --from=build /app/target/venuecatalog-rest-*.jar app.jar
 
-# Expose port 8080
-EXPOSE 8080
-
-# Set environment variables (can be overridden)
+# Railway uses PORT environment variable, default to 8080
+ENV PORT=8080
 ENV JAVA_OPTS="-Xmx512m -Xms256m"
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
+# Expose the port (Railway will override this)
+EXPOSE ${PORT}
 
-# Run the application
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+# Health check (Railway compatible)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/actuator/health || exit 1
+
+# Run the application with dynamic port
+# Railway will inject PORT environment variable
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dserver.port=${PORT} -jar app.jar"]
