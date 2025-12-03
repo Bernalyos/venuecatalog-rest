@@ -307,4 +307,4 @@ Proyecto desarrollado como parte del curso de Spring Boot - Arquitectura Hexagon
 
 ## 👥 Autor
 
-Desarrollado con ❤️ siguiendo las mejores prácticas de Spring Boot y arquitectura limpia.
+Desarrollado con ❤️ siguiendo las mejores prácticas de Spring Boot y arquitectura hexagonal.
